@@ -1,0 +1,355 @@
+{
+  "metadata": {
+    "name": "PhotoAlbum-Java",
+    "description": "A simple photo storage and gallery application built with Spring Boot and Oracle DB",
+    "language": "Java",
+    "framework": "Spring Boot",
+    "version": "2.7.18",
+    "javaVersion": "1.8",
+    "assessmentDate": "2026-02-12T03:01:26.934Z",
+    "assessmentTool": "Manual Application Assessment",
+    "assessmentToolVersion": "1.0.0"
+  },
+  "application": {
+    "name": "PhotoAlbum-Java",
+    "description": "A simple photo storage and gallery application built with Spring Boot and Oracle DB",
+    "packageName": "com.photoalbum",
+    "groupId": "com.photoalbum",
+    "artifactId": "photo-album",
+    "version": "1.0.0",
+    "packaging": "jar"
+  },
+  "summary": {
+    "totalIssues": 8,
+    "criticalIssues": 1,
+    "highIssues": 2,
+    "mediumIssues": 3,
+    "lowIssues": 2,
+    "totalFiles": 11,
+    "linesOfCode": 983,
+    "cloudReadinessScore": 65
+  },
+  "technologies": {
+    "language": "Java 8",
+    "framework": "Spring Boot 2.7.18",
+    "database": "Oracle Database (ojdbc8)",
+    "dependencies": [
+      {
+        "name": "spring-boot-starter-web",
+        "groupId": "org.springframework.boot",
+        "version": "2.7.18",
+        "scope": "compile"
+      },
+      {
+        "name": "spring-boot-starter-thymeleaf",
+        "groupId": "org.springframework.boot",
+        "version": "2.7.18",
+        "scope": "compile"
+      },
+      {
+        "name": "spring-boot-starter-data-jpa",
+        "groupId": "org.springframework.boot",
+        "version": "2.7.18",
+        "scope": "compile"
+      },
+      {
+        "name": "ojdbc8",
+        "groupId": "com.oracle.database.jdbc",
+        "version": "managed",
+        "scope": "runtime"
+      },
+      {
+        "name": "spring-boot-starter-validation",
+        "groupId": "org.springframework.boot",
+        "version": "2.7.18",
+        "scope": "compile"
+      },
+      {
+        "name": "commons-io",
+        "groupId": "commons-io",
+        "artifactId": "commons-io",
+        "version": "2.11.0",
+        "scope": "compile"
+      }
+    ]
+  },
+  "issues": [
+    {
+      "id": "CLOUD-001",
+      "category": "Database",
+      "severity": "Critical",
+      "title": "Oracle Database Dependency",
+      "description": "Application uses Oracle Database which may not be available or cost-effective in cloud environments. Consider migrating to cloud-native database services.",
+      "effort": "High",
+      "recommendation": "Migrate to Azure SQL Database, PostgreSQL, or MySQL. Update JDBC driver and connection strings accordingly.",
+      "impactedFiles": [
+        "pom.xml",
+        "src/main/resources/application.properties",
+        "src/main/resources/application-docker.properties"
+      ],
+      "migrationPath": [
+        "Evaluate database compatibility requirements",
+        "Choose cloud-native database (Azure SQL, PostgreSQL, MySQL)",
+        "Update dependencies in pom.xml",
+        "Update connection strings and properties",
+        "Test application with new database",
+        "Migrate data using Azure Database Migration Service"
+      ]
+    },
+    {
+      "id": "CLOUD-002",
+      "severity": "High",
+      "category": "File Storage",
+      "title": "Database BLOB Storage for Images",
+      "description": "Application stores photo files as BLOBs in the database. This approach doesn't scale well in cloud environments and increases database costs.",
+      "effort": "Medium",
+      "recommendation": "Migrate to Azure Blob Storage or Azure Files for photo storage. Store only metadata and file references in the database.",
+      "impactedFiles": [
+        "src/main/java/com/photoalbum/model/Photo.java",
+        "src/main/java/com/photoalbum/service/impl/PhotoServiceImpl.java",
+        "src/main/java/com/photoalbum/controller/PhotoFileController.java"
+      ],
+      "migrationPath": [
+        "Add Azure Storage SDK dependency",
+        "Configure Azure Storage connection",
+        "Update Photo model to store file URLs instead of BLOBs",
+        "Modify upload logic to save files to Azure Blob Storage",
+        "Update retrieval logic to fetch from Azure Blob Storage",
+        "Migrate existing photos from database to cloud storage"
+      ]
+    },
+    {
+      "id": "CLOUD-003",
+      "category": "Configuration",
+      "severity": "High",
+      "title": "Hardcoded Database Credentials",
+      "description": "Database credentials are hardcoded in application.properties file. This is a security risk in cloud deployments.",
+      "effort": "Low",
+      "recommendation": "Use Azure Key Vault or environment variables for sensitive configuration. Implement Azure Managed Identity for passwordless authentication.",
+      "impactedFiles": [
+        "src/main/resources/application.properties",
+        "src/main/resources/application-docker.properties"
+      ],
+      "migrationPath": [
+        "Set up Azure Key Vault",
+        "Add Azure Key Vault dependency to pom.xml",
+        "Configure application to read from Key Vault",
+        "Store database credentials in Key Vault",
+        "Enable Managed Identity for Azure resources",
+        "Remove hardcoded credentials from properties files"
+      ]
+    },
+    {
+      "id": "CLOUD-004",
+      "category": "Version",
+      "severity": "Medium",
+      "title": "Outdated Java Version",
+      "description": "Application uses Java 8 which is outdated. Modern cloud platforms support and optimize for Java 11, 17, or 21 (LTS versions).",
+      "effort": "Medium",
+      "recommendation": "Upgrade to Java 17 or Java 21 (latest LTS) for better performance, security updates, and cloud compatibility.",
+      "impactedFiles": [
+        "pom.xml"
+      ],
+      "migrationPath": [
+        "Update pom.xml to target Java 17 or 21",
+        "Review code for deprecated APIs",
+        "Update dependencies if needed",
+        "Test application thoroughly",
+        "Update Dockerfile to use Java 17/21 base image"
+      ]
+    },
+    {
+      "id": "CLOUD-005",
+      "category": "Configuration",
+      "severity": "Medium",
+      "title": "DDL Auto Create Mode",
+      "description": "JPA is configured with 'create' ddl-auto mode which drops and recreates schema on every startup. This will cause data loss in production.",
+      "effort": "Low",
+      "recommendation": "Change ddl-auto to 'validate' or 'none' for production. Use database migration tools like Flyway or Liquibase.",
+      "impactedFiles": [
+        "src/main/resources/application.properties"
+      ],
+      "migrationPath": [
+        "Change spring.jpa.hibernate.ddl-auto to 'validate'",
+        "Add Flyway or Liquibase dependency",
+        "Create initial migration scripts",
+        "Configure migration tool in application properties",
+        "Test migration on development environment"
+      ]
+    },
+    {
+      "id": "CLOUD-006",
+      "category": "Containerization",
+      "severity": "Medium",
+      "title": "Container Optimization Needed",
+      "description": "Dockerfile exists but may not be optimized for cloud deployment with multi-stage builds and minimal base images.",
+      "effort": "Low",
+      "recommendation": "Use multi-stage Docker builds with minimal base images (Alpine or Distroless). Implement health checks and optimize layers.",
+      "impactedFiles": [
+        "Dockerfile"
+      ],
+      "migrationPath": [
+        "Review and optimize Dockerfile",
+        "Implement multi-stage build",
+        "Add health check endpoint",
+        "Use minimal base image",
+        "Test container in local environment"
+      ]
+    },
+    {
+      "id": "CLOUD-007",
+      "category": "Monitoring",
+      "severity": "Low",
+      "title": "Limited Observability",
+      "description": "Application lacks integration with cloud monitoring and logging services. No Application Insights or distributed tracing.",
+      "effort": "Low",
+      "recommendation": "Add Azure Application Insights for monitoring, logging, and distributed tracing. Configure proper log aggregation.",
+      "impactedFiles": [
+        "pom.xml",
+        "src/main/resources/application.properties"
+      ],
+      "migrationPath": [
+        "Add Application Insights dependency",
+        "Configure instrumentation key",
+        "Add custom telemetry where needed",
+        "Set up alerts and dashboards in Azure Portal",
+        "Configure log aggregation"
+      ]
+    },
+    {
+      "id": "CLOUD-008",
+      "category": "Scalability",
+      "severity": "Low",
+      "title": "Stateful File Upload",
+      "description": "File upload uses in-memory processing which may cause issues under high load or in scaled-out deployments.",
+      "effort": "Low",
+      "recommendation": "Implement chunked file upload with progress tracking. Consider async processing for large files.",
+      "impactedFiles": [
+        "src/main/java/com/photoalbum/controller/HomeController.java",
+        "src/main/java/com/photoalbum/service/impl/PhotoServiceImpl.java"
+      ],
+      "migrationPath": [
+        "Implement chunked upload endpoint",
+        "Add upload progress tracking",
+        "Consider Azure Service Bus for async processing",
+        "Implement retry logic",
+        "Add upload cancellation support"
+      ]
+    }
+  ],
+  "cloudReadiness": {
+    "score": 65,
+    "factors": {
+      "containerization": {
+        "score": 80,
+        "notes": "Docker support exists. Needs optimization for cloud deployment."
+      },
+      "configuration": {
+        "score": 40,
+        "notes": "Hardcoded credentials present. Needs externalized configuration."
+      },
+      "database": {
+        "score": 50,
+        "notes": "Uses Oracle DB. Migration to cloud-native database recommended."
+      },
+      "storage": {
+        "score": 40,
+        "notes": "Uses database BLOBs. Cloud object storage recommended."
+      },
+      "monitoring": {
+        "score": 60,
+        "notes": "Basic logging present. Cloud monitoring integration needed."
+      },
+      "scalability": {
+        "score": 70,
+        "notes": "Stateless design mostly. File upload needs improvement."
+      },
+      "security": {
+        "score": 50,
+        "notes": "Basic validation present. Credential management needs improvement."
+      }
+    }
+  },
+  "recommendations": {
+    "immediate": [
+      "Remove hardcoded credentials and use Azure Key Vault",
+      "Change JPA ddl-auto mode to 'validate' or 'none'",
+      "Migrate from database BLOB storage to Azure Blob Storage"
+    ],
+    "shortTerm": [
+      "Upgrade to Java 17 or 21",
+      "Migrate from Oracle to Azure SQL Database or PostgreSQL",
+      "Add Azure Application Insights for monitoring",
+      "Implement database migration tool (Flyway/Liquibase)"
+    ],
+    "longTerm": [
+      "Implement comprehensive cloud-native architecture",
+      "Add distributed caching (Azure Cache for Redis)",
+      "Implement API rate limiting and throttling",
+      "Add comprehensive CI/CD pipeline",
+      "Implement disaster recovery strategy"
+    ]
+  },
+  "azureMigrationPath": {
+    "targetArchitecture": "Azure App Service + Azure SQL Database + Azure Blob Storage",
+    "estimatedEffort": "Medium (2-4 weeks)",
+    "steps": [
+      {
+        "phase": "Assessment",
+        "tasks": [
+          "Complete application assessment",
+          "Identify all dependencies and integrations",
+          "Estimate migration effort and costs"
+        ]
+      },
+      {
+        "phase": "Planning",
+        "tasks": [
+          "Choose Azure services (App Service, SQL Database, Blob Storage)",
+          "Design target architecture",
+          "Plan migration strategy (lift-and-shift vs. refactor)",
+          "Set up Azure environment"
+        ]
+      },
+      {
+        "phase": "Development",
+        "tasks": [
+          "Update application for cloud compatibility",
+          "Migrate from Oracle to Azure SQL Database",
+          "Implement Azure Blob Storage for photos",
+          "Add Azure Key Vault integration",
+          "Configure Application Insights",
+          "Update Dockerfile for cloud deployment"
+        ]
+      },
+      {
+        "phase": "Testing",
+        "tasks": [
+          "Test application in Azure environment",
+          "Performance testing",
+          "Security testing",
+          "Load testing"
+        ]
+      },
+      {
+        "phase": "Migration",
+        "tasks": [
+          "Migrate database data to Azure SQL",
+          "Migrate photos to Azure Blob Storage",
+          "Deploy application to Azure App Service",
+          "Configure monitoring and alerts",
+          "Perform cutover"
+        ]
+      },
+      {
+        "phase": "Post-Migration",
+        "tasks": [
+          "Monitor application performance",
+          "Optimize costs",
+          "Implement continuous improvements",
+          "Document runbook and procedures"
+        ]
+      }
+    ]
+  }
+}
