@@ -1,1 +1,5 @@
 *
+!.gitignore
+!architecture-diagram.md
+!assessment/
+!assessment/report.json
